@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DearPaws — Because they're family</title>
+  <meta name="description" content="Premium pet toys and accessories for your beloved dogs. Shop DearPaws for vet-approved, safe, and fun products."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --dp-cream:#fdf8f3;--dp-brown:#3d2c1e;--dp-orange:#e8652a;--dp-sage:#6b8c6e;
+      --dp-light:#fff9f5;--dp-border:#e8ddd4;--dp-text:#2a1f17;--dp-muted:#8a7060;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--dp-cream);color:var(--dp-text);overflow-x:hidden}
+
+    /* NAV */
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(253,248,243,0.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--dp-border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px}
+    .topbar-left{display:flex;align-items:center;gap:16px}
+    .menu-btn{background:none;border:none;cursor:pointer;padding:8px;display:flex;flex-direction:column;gap:5px}
+    .menu-btn span{display:block;width:22px;height:1.5px;background:var(--dp-brown);transition:all 0.3s}
+    .menu-btn.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+    .menu-btn.open span:nth-child(2){opacity:0}
+    .menu-btn.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+    .brand{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--dp-brown);letter-spacing:0.5px;text-decoration:none}
+    .brand span{color:var(--dp-orange)}
+    .topbar-right{display:flex;gap:20px;font-size:13px;font-weight:500;color:var(--dp-muted)}
+    .topbar-right a{text-decoration:none;color:inherit;cursor:pointer;transition:color 0.2s}
+    .topbar-right a:hover{color:var(--dp-orange)}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--dp-light);border-right:1px solid var(--dp-border);z-index:90;transform:translateX(-100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);padding-top:56px;overflow-y:auto}
+    .sidebar.open{transform:translateX(0)}
+    .sidebar-section{border-bottom:1px solid var(--dp-border)}
+    .sidebar-header{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+    .sidebar-header h3{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:1.5px;color:var(--dp-muted)}
+    .sidebar-header .arrow{font-size:10px;color:var(--dp-muted);transition:transform 0.25s}
+    .sidebar-header.expanded .arrow{transform:rotate(180deg)}
+    .sidebar-items{max-height:0;overflow:hidden;transition:max-height 0.3s ease}
+    .sidebar-items.open{max-height:400px}
+    .sidebar-item{padding:10px 24px 10px 32px;font-size:14px;color:var(--dp-text);cursor:pointer;transition:background 0.15s;display:flex;align-items:center;gap:10px}
+    .sidebar-item:hover{background:var(--dp-cream)}
+    .sidebar-item .dot{width:6px;height:6px;border-radius:50%;background:var(--dp-orange);flex-shrink:0}
+    .contact-section{padding:24px}
+    .contact-title{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:1.5px;color:var(--dp-muted);margin-bottom:16px}
+    .contact-item{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:13px;color:var(--dp-text)}
+    .contact-icon{width:32px;height:32px;border-radius:8px;background:var(--dp-cream);border:1px solid var(--dp-border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+    .contact-label{font-size:11px;color:var(--dp-muted);display:block}
+    .contact-value{font-size:13px;color:var(--dp-text);font-weight:500}
+    .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.25);z-index:80;opacity:0;pointer-events:none;transition:opacity 0.3s}
+    .sidebar-overlay.show{opacity:1;pointer-events:all}
+
+    /* HERO */
+    .hero{margin-top:56px;position:relative;height:calc(100vh - 56px);min-height:480px;overflow:hidden}
+    .slides{display:flex;height:100%;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1)}
+    .slide{min-width:100%;height:100%;position:relative;flex-shrink:0}
+    .slide-gradient{position:absolute;inset:0;background:linear-gradient(to right,rgba(61,44,30,0.55) 0%,rgba(61,44,30,0.1) 60%,transparent 100%)}
+    .slide-content{position:absolute;top:50%;left:8%;transform:translateY(-50%);color:white;max-width:380px}
+    .slide-tag{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.75);margin-bottom:12px}
+    .slide-title{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,48px);line-height:1.15;font-weight:600;margin-bottom:16px}
+    .slide-sub{font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6;margin-bottom:28px}
+    .slide-cta{display:inline-flex;align-items:center;gap:8px;background:var(--dp-orange);color:white;border:none;padding:12px 24px;border-radius:4px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity 0.2s;font-family:'DM Sans',sans-serif}
+    .slide-cta:hover{opacity:0.88}
+
+    /* HOTSPOTS */
+    .hotspot{position:absolute;cursor:pointer;z-index:10}
+    .hotspot-ring{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.9);border:2px solid white;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+    .hotspot:hover .hotspot-ring{transform:scale(1.15)}
+    .hotspot-ring::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--dp-orange);display:block}
+    .hotspot-pulse{position:absolute;inset:-4px;border-radius:50%;border:1.5px solid rgba(232,101,42,0.5);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:0}}
+    .hotspot-card{position:absolute;background:white;border-radius:10px;padding:12px 14px;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,0.15);opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;transform:translateY(6px);font-family:'DM Sans',sans-serif;z-index:20}
+    .hotspot-card.show{opacity:1;pointer-events:all;transform:translateY(0)}
+    .hotspot-card.above{bottom:calc(100% + 12px);left:50%;transform:translateX(-50%) translateY(6px)}
+    .hotspot-card.above.show{transform:translateX(-50%) translateY(0)}
+    .hotspot-card.left{right:calc(100% + 12px);top:50%;transform:translateY(-50%) translateX(6px)}
+    .hotspot-card.left.show{transform:translateY(-50%) translateX(0)}
+    .hc-name{font-size:13px;font-weight:500;color:#2a1f17;margin-bottom:2px}
+    .hc-price{font-size:16px;font-weight:600;color:var(--dp-orange)}
+    .hc-sub{font-size:11px;color:#8a7060;margin-bottom:10px}
+    .hc-btn{width:100%;background:var(--dp-brown);color:white;border:none;padding:7px;border-radius:5px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
+    .hc-btn:hover{background:var(--dp-orange)}
+    .dots{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:15}
+    .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.45);cursor:pointer;transition:all 0.3s}
+    .dot.active{background:white;width:24px;border-radius:3px}
+    .slide-arrows{position:absolute;bottom:24px;right:32px;display:flex;gap:8px;z-index:15}
+    .arr-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+    .arr-btn:hover{background:rgba(255,255,255,0.3)}
+
+    /* PRODUCTS */
+    .products-strip{background:white;border-top:1px solid var(--dp-border);padding:40px 40px 48px}
+    .strip-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:28px}
+    .strip-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--dp-brown)}
+    .strip-link{font-size:13px;color:var(--dp-orange);cursor:pointer;text-decoration:none}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px}
+    .product-card{border:1px solid var(--dp-border);border-radius:10px;overflow:hidden;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;background:var(--dp-cream)}
+    .product-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(61,44,30,0.1)}
+    .pc-img{height:140px;background:var(--dp-cream);display:flex;align-items:center;justify-content:center;font-size:52px}
+    .pc-body{padding:12px 14px}
+    .pc-tag{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--dp-orange);font-weight:500;margin-bottom:4px}
+    .pc-name{font-size:14px;font-weight:500;color:var(--dp-brown);margin-bottom:4px}
+    .pc-price{font-size:16px;font-weight:600;color:var(--dp-text)}
+    .pc-rating{font-size:11px;color:var(--dp-muted);margin-top:3px}
+
+    /* TRUST BANNER */
+    .trust-banner{background:var(--dp-brown);color:white;display:flex;justify-content:center;gap:48px;padding:20px 40px;flex-wrap:wrap}
+    .trust-item{display:flex;align-items:center;gap:10px;font-size:13px}
+    .trust-icon{font-size:18px}
+
+    /* FOOTER */
+    footer{background:var(--dp-cream);border-top:1px solid var(--dp-border);padding:32px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+    .footer-brand{font-family:'Playfair Display',serif;font-size:18px;color:var(--dp-brown)}
+    .footer-brand span{color:var(--dp-orange)}
+    .footer-copy{font-size:12px;color:var(--dp-muted)}
+    .footer-links{display:flex;gap:20px;font-size:12px;color:var(--dp-muted)}
+    .footer-links a{text-decoration:none;color:inherit}
+    .footer-links a:hover{color:var(--dp-orange)}
+  </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="topbar-left">
+    <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="/" class="brand">Dear<span>Paws</span></a>
+  </div>
+  <div class="topbar-right">
+    <a href="#">Shop</a>
+    <a href="#">About</a>
+    <a href="#">Track Order</a>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-header expanded" id="sh-toys" onclick="toggleSection('toys')">
+      <h3>Dog Toys</h3><span class="arrow">▼</span>
+    </div>
+    <div class="sidebar-items open" id="si-toys">
+      <div class="sidebar-item"><span class="dot"></span>Chewy Toys</div>
+      <div class="sidebar-item"><span class="dot"></span>Rope Toys</div>
+      <div class="sidebar-item"><span class="dot"></span>Squeaky Toys</div>
+      <div class="sidebar-item"><span class="dot"></span>Plush Toys</div>
+      <div class="sidebar-item"><span class="dot"></span>Fetch &amp; Ball Toys</div>
+      <div class="sidebar-item"><span class="dot"></span>Puzzle Toys</div>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-header" id="sh-acc" onclick="toggleSection('acc')">
+      <h3>Accessories</h3><span class="arrow">▼</span>
+    </div>
+    <div class="sidebar-items" id="si-acc">
+      <div class="sidebar-item"><span class="dot"></span>Collars &amp; Leashes</div>
+      <div class="sidebar-item"><span class="dot"></span>Beds &amp; Crates</div>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-header" id="sh-treats" onclick="toggleSection('treats')">
+      <h3>Treats</h3><span class="arrow">▼</span>
+    </div>
+    <div class="sidebar-items" id="si-treats">
+      <div class="sidebar-item"><span class="dot"></span>Dental Chews</div>
+      <div class="sidebar-item"><span class="dot"></span>Training Treats</div>
+    </div>
+  </div>
+  <div class="contact-section">
+    <div class="contact-title">Contact Us</div>
+    <div class="contact-item">
+      <div class="contact-icon">✉</div>
+      <div><span class="contact-label">Email</span><span class="contact-value">hello@dearpaws.in</span></div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-icon">📱</div>
+      <div><span class="contact-label">WhatsApp</span><span class="contact-value">+91 98765 43210</span></div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-icon">🕐</div>
+      <div><span class="contact-label">Support hours</span><span class="contact-value">Mon–Sat, 9am–7pm</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="slides" id="slides">
+
+    <!-- Slide 1 -->
+    <div class="slide">
+      <div style="width:100%;height:100%;background:linear-gradient(135deg,#c9a882 0%,#8b6347 40%,#5c3d2e 100%);position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:5%;left:30%;font-size:160px;opacity:0.08;line-height:1">🐕</div>
+        <div style="position:absolute;top:25%;right:12%;font-size:90px;transform:rotate(-15deg)">🐶</div>
+        <div style="position:absolute;top:55%;right:25%;font-size:60px;transform:rotate(10deg)">🦴</div>
+        <div style="position:absolute;top:40%;right:38%;font-size:50px;transform:rotate(-5deg)">🧸</div>
+      </div>
+      <div class="slide-gradient"></div>
+      <div class="slide-content">
+        <div class="slide-tag">New arrivals · Chewy collection</div>
+        <div class="slide-title">Toys they'll love to bits</div>
+        <div class="slide-sub">Premium chewy toys designed for happy, healthy dogs. Safe materials, irresistible fun.</div>
+        <button class="slide-cta">Shop now →</button>
+      </div>
+      <div class="hotspot" style="top:42%;right:37%" onmouseenter="showCard('h1')" onmouseleave="hideCard('h1')">
+        <div class="hotspot-pulse"></div>
+        <div class="hotspot-ring"></div>
+        <div class="hotspot-card above" id="h1">
+          <div class="hc-name">Plush Bear Chewer</div>
+          <div class="hc-price">₹349</div>
+          <div class="hc-sub">Soft &amp; durable · All breeds</div>
+          <button class="hc-btn">Add to cart</button>
+        </div>
+      </div>
+      <div class="hotspot" style="top:54%;right:24%" onmouseenter="showCard('h2')" onmouseleave="hideCard('h2')">
+        <div class="hotspot-pulse"></div>
+        <div class="hotspot-ring"></div>
+        <div class="hotspot-card left" id="h2">
+          <div class="hc-name">Knotted Rope Bone</div>
+          <div class="hc-price">₹199</div>
+          <div class="hc-sub">Natural cotton · Dental safe</div>
+          <button class="hc-btn">Add to cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide">
+      <div style="width:100%;height:100%;background:linear-gradient(135deg,#7aad7e 0%,#4a8c6b 40%,#2d6b52 100%);position:relative;overflow:hidden">
+        <div style="position:absolute;top:20%;right:10%;font-size:100px;transform:rotate(15deg)">🎾</div>
+        <div style="position:absolute;top:50%;right:18%;font-size:80px;transform:rotate(-10deg)">🐩</div>
+        <div style="position:absolute;bottom:15%;right:8%;font-size:55px">🌿</div>
+      </div>
+      <div class="slide-gradient"></div>
+      <div class="slide-content">
+        <div class="slide-tag">Outdoor play · Fetch series</div>
+        <div class="slide-title">Play time, every time</div>
+        <div class="slide-sub">Fetch toys built for the park, the backyard, and beyond. Durable, bright, and bouncy.</div>
+        <button class="slide-cta">Explore →</button>
+      </div>
+      <div class="hotspot" style="top:22%;right:9%" onmouseenter="showCard('h3')" onmouseleave="hideCard('h3')">
+        <div class="hotspot-pulse"></div>
+        <div class="hotspot-ring"></div>
+        <div class="hotspot-card left" id="h3">
+          <div class="hc-name">Bounce Tennis Ball Set</div>
+          <div class="hc-price">₹249</div>
+          <div class="hc-sub">Pack of 3 · High-visibility</div>
+          <button class="hc-btn">Add to cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide">
+      <div style="width:100%;height:100%;background:linear-gradient(135deg,#e8b97a 0%,#d4844a 40%,#b05e2d 100%);position:relative;overflow:hidden">
+        <div style="position:absolute;top:18%;right:12%;font-size:95px;transform:rotate(-8deg)">🦮</div>
+        <div style="position:absolute;top:50%;right:6%;font-size:65px;transform:rotate(12deg)">🍖</div>
+        <div style="position:absolute;bottom:10%;right:22%;font-size:55px">🎪</div>
+      </div>
+      <div class="slide-gradient"></div>
+      <div class="slide-content">
+        <div class="slide-tag">Bestseller · Dental health</div>
+        <div class="slide-title">Chew happy, stay healthy</div>
+        <div class="slide-sub">Vet-approved dental chew toys that clean teeth while keeping tails wagging all day.</div>
+        <button class="slide-cta">Shop bestsellers →</button>
+      </div>
+      <div class="hotspot" style="top:52%;right:5%" onmouseenter="showCard('h4')" onmouseleave="hideCard('h4')">
+        <div class="hotspot-pulse"></div>
+        <div class="hotspot-ring"></div>
+        <div class="hotspot-card left" id="h4">
+          <div class="hc-name">Dental Chew Ring</div>
+          <div class="hc-price">₹299</div>
+          <div class="hc-sub">Vet approved · Reduces tartar</div>
+          <button class="hc-btn">Add to cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dots">
+    <div class="dot active" onclick="goTo(0)"></div>
+    <div class="dot" onclick="goTo(1)"></div>
+    <div class="dot" onclick="goTo(2)"></div>
+  </div>
+  <div class="slide-arrows">
+    <button class="arr-btn" onclick="prevSlide()">‹</button>
+    <button class="arr-btn" onclick="nextSlide()">›</button>
+  </div>
+</section>
+
+<!-- TRUST BANNER -->
+<div class="trust-banner">
+  <div class="trust-item"><span class="trust-icon">🐾</span>100% pet-safe materials</div>
+  <div class="trust-item"><span class="trust-icon">🚚</span>Free delivery over ₹499</div>
+  <div class="trust-item"><span class="trust-icon">↩</span>7-day easy returns</div>
+  <div class="trust-item"><span class="trust-icon">✓</span>Vet-reviewed products</div>
+</div>
+
+<!-- PRODUCTS -->
+<section class="products-strip">
+  <div class="strip-header">
+    <div class="strip-title">Our chewy toys</div>
+    <a class="strip-link" href="#">View all →</a>
+  </div>
+  <div class="products-grid">
+    <div class="product-card"><div class="pc-img">🧸</div><div class="pc-body"><div class="pc-tag">Plush</div><div class="pc-name">Bear Hugger Chewer</div><div class="pc-price">₹349</div><div class="pc-rating">★★★★★ (42)</div></div></div>
+    <div class="product-card"><div class="pc-img">🦴</div><div class="pc-body"><div class="pc-tag">Rubber</div><div class="pc-name">Classic Bone Chew</div><div class="pc-price">₹279</div><div class="pc-rating">★★★★☆ (31)</div></div></div>
+    <div class="product-card"><div class="pc-img">🪢</div><div class="pc-body"><div class="pc-tag">Rope</div><div class="pc-name">Knotted Rope Bone</div><div class="pc-price">₹199</div><div class="pc-rating">★★★★★ (58)</div></div></div>
+    <div class="product-card"><div class="pc-img">💚</div><div class="pc-body"><div class="pc-tag">Dental</div><div class="pc-name">Dental Chew Ring</div><div class="pc-price">₹299</div><div class="pc-rating">★★★★★ (76)</div></div></div>
+    <div class="product-card"><div class="pc-img">🐟</div><div class="pc-body"><div class="pc-tag">Squeaky</div><div class="pc-name">Fishy Squeaker</div><div class="pc-price">₹229</div><div class="pc-rating">★★★★☆ (19)</div></div></div>
+    <div class="product-card"><div class="pc-img">🍗</div><div class="pc-body"><div class="pc-tag">Rubber</div><div class="pc-name">Chick Leg Chewer</div><div class="pc-price">₹319</div><div class="pc-rating">★★★★☆ (24)</div></div></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Dear<span>Paws</span></div>
+  <div class="footer-copy">© 2025 DearPaws. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Shipping Policy</a>
+    <a href="#">Returns</a>
+  </div>
+</footer>
+
+<script>
+  let cur=0,total=3,timer;
+  function goTo(n){
+    cur=n;
+    document.getElementById('slides').style.transform='translateX(-'+(cur*100)+'%)';
+    document.querySelectorAll('.dot').forEach(function(d,i){d.classList.toggle('active',i===cur)});
+  }
+  function nextSlide(){goTo((cur+1)%total)}
+  function prevSlide(){goTo((cur-1+total)%total)}
+  function startAuto(){timer=setInterval(nextSlide,4500)}
+  function stopAuto(){clearInterval(timer)}
+  document.querySelector('.hero').addEventListener('mouseenter',stopAuto);
+  document.querySelector('.hero').addEventListener('mouseleave',startAuto);
+  startAuto();
+  function toggleSidebar(){
+    var s=document.getElementById('sidebar');
+    var o=document.getElementById('overlay');
+    var b=document.getElementById('menuBtn');
+    var open=s.classList.toggle('open');
+    o.classList.toggle('show',open);
+    b.classList.toggle('open',open);
+  }
+  function closeSidebar(){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('menuBtn').classList.remove('open');
+  }
+  function toggleSection(id){
+    var items=document.getElementById('si-'+id);
+    var header=document.getElementById('sh-'+id);
+    var open=items.classList.toggle('open');
+    header.classList.toggle('expanded',open);
+  }
+  function showCard(id){document.getElementById(id).classList.add('show')}
+  function hideCard(id){document.getElementById(id).classList.remove('show')}
+</script>
+</body>
+</html>
